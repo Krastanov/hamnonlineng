@@ -1,4 +1,6 @@
 MANIFEST
 dist
+hamnonlineng.egg-info
 examples/.ipynb_checkpoints
 *.pyc
+doc/_*

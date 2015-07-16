@@ -15,20 +15,20 @@ import operator
 
 
 class Monomial(object):
-    """A class representing a monomial of the type ``number*operators + h.c.``.
+    '''A class representing a monomial of the type ``number*operators + h.c.``.
 
-    *The h.c. part is implicit*.
+    **The h.c. part is implicit.**
 
     Operators have to be single letters.
     Capital letters stand for the hermitian conjugates of lower letters.
 
-    `Monomial.n` is the numerical factor.
-    `Monomial.s` is the string of operators.
+    ``Monomial.n`` is the numerical factor.
+    ``Monomial.s`` is the string of operators.
 
     >>> Monomial(1,'a')*Monomial(1,'b')
     1.ab
     1.aB
-    """
+    '''
     def __new__(cls, number, symbol):
         if number == 0:
             return 0
@@ -39,8 +39,7 @@ class Monomial(object):
         if len(normal_symbols) == 1:
             symbol = normal_symbols[0]
             conj_symbol = Monomial._hermitian_conjugate_string(symbol)
-            if hash(conj_symbol) < hash(symbol):
-                symbol = conj_symbol
+            symbol = sorted([symbol, conj_symbol])[0]
             self = super(Monomial, cls).__new__(cls)
             self.n = number
             self.s = symbol
@@ -108,14 +107,12 @@ class Monomial(object):
     @staticmethod
     def _hermitian_conjugate_string(string):
         return Monomial._proper_sorting_string(string[::-1].swapcase())
-    def dag(self):
-        return Monomial(self.n, Monomial.hermitian_conjugate_string(self.s))
 
 
 class Polynomial(object):
-    """A class representing a sum of monomials (each monomial implicitly having its h.c.).
+    '''A class representing a sum of monomials (each monomial implicitly having its h.c.).
 
-    `Polynomial.m` gives the list of monomials."""
+    ``Polynomial.m`` gives the list of monomials.'''
     def __new__(cls, monomials):
         not_flat, flat = split_by_predicate(lambda _: isinstance(_, Polynomial), monomials)
         monomials = itertools.chain(flat, *(_.m for _ in not_flat))
@@ -196,26 +193,26 @@ def sin_terms(x, order):
 
 
 def drop_matching(monomials, to_drop):
-    """From the list `monomials` filter out Monomials present in the list
-    `to_drop`. Compare only the string part, neglect the numerical factor."""
+    '''From the list ``monomials`` filter out Monomials present in the list
+    ``to_drop``. Compare only the string part, neglect the numerical factor.'''
     return itertools.filterfalse(lambda _:any(d.s==_.s for d in to_drop),
                                  monomials)
 
 
 def retain_matching(monomials, to_retain):
-    """The inverse of drop_matching."""
+    '''The inverse of ``drop_matching``.'''
     return (_ for _ in monomials if any(d.s==_.s for d in to_retain))
 
 
 def drop_definitely_offresonant(monomials):
-    """From the list `monomials` filter out Monomials that contain only
-    annihilation or only creation operators."""
+    '''From the list ``monomials`` filter out Monomials that contain only
+    annihilation or only creation operators.'''
     return (_ for _ in monomials if not (_.s.isupper() or _.s.islower()))
 
 
 def drop_single_mode(monomials):
-    """From the list `monomials` filter out Monomials that contain operators
-    for only a single mode."""
+    '''From the list ``monomials`` filter out Monomials that contain operators
+    for only a single mode.'''
     return itertools.filterfalse(lambda _: all(_.s[0].lower()==__ for __ in _.s[1:].lower()),
                                  monomials)
 
@@ -229,14 +226,14 @@ def monomial_to_constraint(monomial, letters): # XXX Assumes only Monomial insta
 
 
 def monomials_to_matrix(monomials, letters):
-    """Run `monomial_to_constraint` on each element of the list `monomials` and
-    generate the matrix of constraints."""
+    '''Run ``monomial_to_constraint`` on each element of the list ``monomials`` and
+    generate the matrix of constraints.'''
     import numpy as np
     return np.array([monomial_to_constraint(_, letters) for _ in monomials],dtype=int)
 
 
 def solve_constraints_gecode(resonant_monomials, off_resonant_monomials, letters, maxfreq=10, elastic=0):
-    '''Uses gecode to solve the constraints.'''
+    '''Uses ``gecode`` to solve the constraints.'''
     import gecode
     s = gecode.space()
     variables = s.intvars(len(letters),1,maxfreq)
@@ -254,7 +251,7 @@ def solve_constraints_gecode(resonant_monomials, off_resonant_monomials, letters
 
 
 def solve_constraints_ortools(resonant_monomials, off_resonant_monomials, letters, maxfreq=10):
-    '''Uses ortools to solve the constraints.'''
+    '''Uses ``ortools`` to solve the constraints.'''
     from ortools.constraint_solver import pywrapcp
     from uuid import uuid4
     solver = pywrapcp.Solver(str(uuid4()))
@@ -277,7 +274,7 @@ def solve_constraints_ortools(resonant_monomials, off_resonant_monomials, letter
 
 
 def head_and_count(iterator):
-    """Print the first 10 and store the first 100000 solutions."""
+    '''Print the first 10 and store the first 100000 solutions.'''
     count = 0
     res = []
     for _ in iterator:
@@ -295,7 +292,7 @@ def head_and_count(iterator):
 
 def solve_linearprog_ortools_glop(resonant_monomials, off_resonant_monomials, letters, maxfreq=10,
                                   detune=0.5):
-    '''Uses ortools to solve the linear programming problem.'''
+    '''Uses ``ortools`` to solve the linear programming problem.'''
     from ortools.linear_solver import pywraplp
     from uuid import uuid4
     solver = pywraplp.Solver(str(uuid4()),
@@ -335,21 +332,21 @@ def solve_linearprog_ortools_glop(resonant_monomials, off_resonant_monomials, le
 
 def solve_linearprog_scipy(resonant_monomials, off_resonant_monomials, letters, maxfreq=10,
                            detune=0.5):
-    '''Uses scipy to solve the linear programming problem.'''
+    '''Uses ``scipy`` to solve the linear programming problem.'''
     raise NotImplementedError
     #needs sparse matrices...
 
 
 def solve_linearprog_pulp(resonant_monomials, off_resonant_monomials, letters, maxfreq=10,
-                          detune=0.5, distinct=True):
-    '''Uses ortools to solve the linear programming problem.'''
+                          detune=0.5, distinct=True, elastic=0):
+    '''Uses ``pulp`` to solve the linear programming problem.'''
     import pulp
     from uuid import uuid4
     problem_name = str(uuid4())
     prob = pulp.LpProblem(problem_name, pulp.LpMinimize)
     variables = [pulp.LpVariable(_, 0, maxfreq, pulp.LpContinuous) for _ in letters]
     prob += sum(variables)
-    print("Adding resonant constraints...")
+    print('Adding resonant constraints...')
     for m in resonant_monomials:
         constr = monomial_to_constraint(m, letters)
         expr = sum(c*v for c, v in zip(constr, variables))
@@ -358,7 +355,7 @@ def solve_linearprog_pulp(resonant_monomials, off_resonant_monomials, letters, m
             prob += (expr >= -elastic)
         else:
             prob += (expr == 0)
-    print("Adding off-resonant constraints...")
+    print('Adding off-resonant constraints...')
     for m in off_resonant_monomials:
         constr = monomial_to_constraint(m, letters)
         x = sum(c*v for c, v in zip(constr, variables))
@@ -367,25 +364,25 @@ def solve_linearprog_pulp(resonant_monomials, off_resonant_monomials, letters, m
         prob += (x+M*b >= detune)
         prob += (-x-M*b >= detune-M)
     if distinct:
-        print("Adding distinct constraints...")
+        print('Adding distinct constraints...')
         for l, r in itertools.combinations(variables, 2):
             b = pulp.LpVariable(str(uuid4()), 0, 1, pulp.LpBinary)
             M = detune + maxfreq
             prob += (l-r+M*b >= detune)
             prob += (-l+r-M*b >= detune-M)
     else:
-        print("Skipping distinct contraints.")
-    print("Dumping LP file...")
-    prob.writeLP("%s.lp"%problem_name)
-    print("Solving...")
+        print('Skipping distinct contraints.')
+    print('Dumping LP file...')
+    prob.writeLP('%s.lp'%problem_name)
+    print('Solving...')
     prob.solve()
-    print("Status: %d - %s"%(prob.status,pulp.LpStatus[prob.status]))
-    return [(_.name, _.value()) for _ in variables]
+    print('Status: %d - %s'%(prob.status,pulp.LpStatus[prob.status]))
+    return [_.value() for _ in variables]
 
 
 def detuning_of_monomial(solution, monomials, letters):
-    """For the frequencies given in `solution` calculate the detuning of the
-    Monomials given in the list `monomials`."""
+    '''For the frequencies given in ``solution`` calculate the detuning of the
+    Monomials given in the list ``monomials``.'''
     import numpy as np
     mat = monomials_to_matrix(monomials, letters)
     det = np.abs(mat.dot(solution))
@@ -393,8 +390,8 @@ def detuning_of_monomial(solution, monomials, letters):
 
 
 def filter_resonant(solution, monomials, letters):
-    """Return only the resonant Monomials from the list `monomials` given the
-    frequencies in `solution`."""
+    '''Return only the resonant Monomials from the list ``monomials`` given the
+    frequencies in ``solution``.'''
     import numpy as np
     det = detuning_of_monomial(solution, monomials, letters)
     return [monomials[i] for i in np.argwhere(det==0)]
