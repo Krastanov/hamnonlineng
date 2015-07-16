@@ -2,12 +2,12 @@ from distutils.core import setup
 setup(
     name = "hamnonlineng",
     packages = ["hamnonlineng"],
-    version = "0.1.0a1",
+    version = "0.1.0a2",
     description = "Engineering Hamiltonians through Nonlinearities",
     author = "Stefan Krastanov",
     author_email = "stefan@krastanov.org",
-    url = "",
-    download_url = "",
+    url = "https://github.com/hamnonlineng/hamnonlineng",
+    download_url ="https://github.com/hamnonlineng/hamnonlineng/archive/master.zip",
     install_requires=['future'],
     keywords = ["physics", "quantum", "BBQ", "nonlinearity", "constraint programming", "linear programming"],
     classifiers = [
