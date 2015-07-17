@@ -140,6 +140,8 @@ class Polynomial(object):
             return Polynomial(self.m+[other])
     def __radd__(self, other):
         return self+other
+    def __sub__(self, other):
+        return self + (-1*other)
     def __mul__(self, other):
         if not isinstance(other, Polynomial):
             return Polynomial(_*other for _ in self.m)

@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = "hamnonlineng",
     packages = ["hamnonlineng"],
-    version = "0.1.0a2",
+    version = "0.1.0a3",
     description = "Engineering Hamiltonians through Nonlinearities",
     author = "Stefan Krastanov",
     author_email = "stefan@krastanov.org",
